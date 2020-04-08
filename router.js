@@ -109,16 +109,32 @@ router.delete('/:id', (req, res) => {
   db.findById(req.params.id)
   .then(post => {
     deletedPost = post
-    console.log(deletedPost)
   })
   db.remove(req.params.id)
   .then(item => {
-    console.log(item)
     res.json(deletedPost)
   }) 
 })
 
-
-
+router.put('/:id', (req, res) => {
+  let id = req.params.id
+  db.findById(id)
+    .then(post => {
+      if (!post){
+        res.status(404).json({ message: "The post with the specified ID does not exist."})
+      } else if (!req.body.title || !req.body.contents){
+        res.status(400).json({ message: "Provide title and contents."})
+      } else {
+        db.update(id, req.body)
+        .then(val => {
+          db.findById(id)
+          .then(updatedPost => {
+            res.status(200).json(updatedPost)
+          })
+        })
+        .catch(err => res.status(500).json({ message: "The post information could not be modified."}))
+      }
+    })
+})
 
 module.exports = router
